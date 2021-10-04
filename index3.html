@@ -35,40 +35,44 @@
             <main role="main" class="col-md-10 ml-sm-auto col-lg-10 px-40">
                 <div class="row">
                     <div class="col">
-                        <div id="status" class="alert alert-primary" role="start">
+                        <div id="status" class="alert alert-primary" role="alert">
                             <img src="img/ajax-loader.gif" /> Cargando OpenCV
                         </div>
                     </div>
                 </div>
 
-                <span class="badge badge-pill badge-primary ml-2">1</span><input type="file" id="fileInput" name="file" accept="image/*">
+                <div id="main_process" class="row">
+                    <div class="col">
+                        <span class="step">1</span>
+                        <input type="file" id="fileInput" name="file" accept="image/*0">
+                        <br><br>
+                        <span class="step">2</span>
+                        <select class="form-control" id="filter">
+                            <option value="0">Selecciona un filtro</option>
+                            <option value="1">Threshold</option>
+                        </select>
+                        <br>
 
-                <div class="row">
-                    <div class="col">
-                        <span class="badge badge-pill badge-primary ml-2">2</span>
-                        <div class="col">
-                            <select class="form-control" id="filter">
-                                <option value="0">Choose a filter</option>
-                                <option value="1">Threshold</option>
-                                <option value="2">Gaussian Blur</option>
-                                <option value="3">Canny</option>
-                                <option value="4">Equalize Histogram</option>
-                            </select>
-                            <button type="button" class="btn btn-primary">Procesar Imagen</button>
+                        <div id="step3_o1" class="step_blocks hide">
+                            <span class="step">3</span>
+                            Threshold: <span id="value_sel">100</span>
+                            <input type="range" class="custom-range" min="0" max="255" value="100" id="value">
                         </div>
-                    
+
+                        <a href="#" class="btn btn-primary" style="display: none;" id="cv_start">Procesar Imagen</a>
                     </div>
-                
+
                     <div class="col">
-                        <h6>Imagen Input</h6>
-                        <img id="imgSrc" alt="Sin imagen" class="small" src="img/gray.png">
+                        Imagen Original<br>
+                        <img id="imageSrc" class="small" alt="imagen">
                     </div>
+
                     <div class="col">
-                        <h6>Imagen Resultado</h6>
+                        Resultado<br>
                         <canvas id="canvasOutput" class="small" height="300px"></canvas>
                     </div>
-                    
                 </div>
+
             </main>
 
         </div>
@@ -81,24 +85,44 @@
 
         <script type="text/javascript">
 
-            let imgElement = document.getElementById('imgSrc');
+            let imgElement = document.getElementById('imageSrc');
             let inputElement = document.getElementById('fileInput');
 
             inputElement.addEventListener('change', (e) =>{
-
                 imgElement.src = URL.createObjectURL(e.target.files[0]);
+            }, false);
 
-            }, false)
+            function process() {
+                let mat = cv.imread(imgElement)
+                let mat_result = new cv.Mat();
+                let filter = parseInt($("#filter").val());
 
-            imgElement.onload = function (){
-                let mat = cv.imread(imgElement);
-                cv.cvtColor(mat, mat, cv.COLOR_BGR2GRAY);
-                cv.imshow('canvasOutput', mat);
+                switch(filter){
+                    case 1:{
+                        let value = parseInt($("#value").val());
+                        cv.threshold(mat, mat_result, value, 255, cv.THRESH_BINARY);
+                    break;}
+                }
+
+                cv.imshow('canvasOutput', mat_result);
                 mat.delete();
-            }
+                mat_result.delete();
+            };
 
             function onOpenCvReady() {
-                document.getElementById('status').innerHTML = '<b>OpenCV cargó correctamente';
+                document.getElementById('status').innerHTML = '<b>OpenCV cargó correctamente</b>';
+                $("#cv_start").show();
+                $("#main_process").show();
+                $("#cv_start").click(process);
+                $("#filter").change(function(){
+                    let filter= parseInt($("#filter").val());
+                    $(".step_blocks").hide();
+                    $("#step3_o"+filter).show();
+                });
+                $("#value").change(function(){
+                    $("value_sel").html($(this).val());
+                    process();
+                })
             }
 
             function onOpenCvError() {
