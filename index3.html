@@ -53,6 +53,8 @@
                             <option value="2">Gaussian Blur</option>
                             <option value="3">Canny</option>
                             <option value="4">Equalize Histogram</option>
+                            <option value="5">Blanco y Negro</option>
+
                         </select>
                         <br>
 
@@ -136,6 +138,12 @@
                         cv.cvtColor(mat, mat, cv.COLOR_BGR2GRAY);
                         cv.equalizeHist(mat, mat_result);
                     break;}
+                    case 5:{
+                        let mat = cv.imread(imgElement);
+                        cv.cvtColor(mat,mat, cv.COLOR_BGR2GRAY);
+                        cv.imshow('canvasOutput', mat);
+                        mat.delete();
+                        break;}
                 }
 
                 cv.imshow('canvasOutput', mat_result);
